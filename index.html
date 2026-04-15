@@ -2,35 +2,66 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Pico W Remote Control</title>
+    <title>Pico W RGB Control</title>
     <style>
         body { font-family: sans-serif; text-align: center; margin-top: 50px; }
-        button { padding: 20px 40px; font-size: 20px; cursor: pointer; margin: 10px; border-radius: 10px; border: none; }
-        .on { background-color: #4CAF50; color: white; }
+        button { padding: 15px 30px; font-size: 18px; cursor: pointer; margin: 10px; border-radius: 10px; border: none; }
+        .apply { background-color: #4CAF50; color: white; }
         .off { background-color: #f44336; color: white; }
+        input { width: 100px; height: 50px; border: none; }
     </style>
 </head>
 <body>
-    <h1>Pico W LED Control</h1>
+
+    <h1>Pico W RGB LED Control</h1>
+
     <div id="statusText">데이터 확인 중...</div>
     <br>
-    <button class="on" onclick="setLED('ON')">LED ON</button>
-    <button class="off" onclick="setLED('OFF')">LED OFF</button>
+
+    <!-- 🎨 색 선택 -->
+    <input type="color" id="colorPicker" value="#ff0000">
+    <br><br>
+
+    <button class="apply" onclick="setColor()">색 적용</button>
+    <button class="off" onclick="turnOff()">LED OFF</button>
 
     <script>
-        // 본인의 Firebase URL로 교체 (끝에 /ledStatus.json 을 붙여야 합니다)
         const dbUrl = "https://pico-1a284-default-rtdb.asia-southeast1.firebasedatabase.app/ledStatus.json";
 
-        function setLED(state) {
+        function setColor() {
+            const color = document.getElementById('colorPicker').value;
+
+            // HEX → RGB 변환
+            const r = parseInt(color.substr(1,2), 16);
+            const g = parseInt(color.substr(3,2), 16);
+            const b = parseInt(color.substr(5,2), 16);
+
+            const rgb = { r: r, g: g, b: b };
+
             fetch(dbUrl, {
                 method: 'PUT',
-                body: JSON.stringify(state)
+                body: JSON.stringify(rgb)
             })
             .then(res => res.json())
             .then(data => {
-                document.getElementById('statusText').innerText = "상태: " + data;
+                document.getElementById('statusText').innerText =
+                    `RGB: (${r}, ${g}, ${b})`;
+            });
+        }
+
+        function turnOff() {
+            const rgb = { r: 0, g: 0, b: 0 };
+
+            fetch(dbUrl, {
+                method: 'PUT',
+                body: JSON.stringify(rgb)
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('statusText').innerText = "LED OFF";
             });
         }
     </script>
+
 </body>
 </html>
